@@ -44,14 +44,14 @@ Realize a migração necessária para construir o banco SQLite:
 
 O projeto está organizado em 4 branches diferentes:
 
-~~~
-main # branch principal do projeto
-develop # branch de desenvolvimento com a configuração inicial
-feature/basic # branch com os modelos básicos do projeto
-feature/intermediate # branch com endpoints ativos
-feature/advanced # branch com implementações de endpoints personalizados com tratamento de erros
-feature/api_tests # branch com implementações dos endpoints e testes da API
-~~~
+
+**main** - branch principal do projeto
+**develop** - branch de desenvolvimento com a configuração inicial
+**feature/basic** - branch com os modelos básicos do projeto
+**feature/intermediate** - branch com endpoints ativos
+**feature/advanced** - branch com implementações de endpoints personalizados com tratamento de erros
+**feature/api_tests** - branch com implementações dos endpoints e testes da API
+
 
 ### Execução
 
