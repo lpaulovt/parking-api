@@ -16,7 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework.routers import SimpleRouter
+
+from management.api.views import ParkingViewSet, ParkingSpaceViewSet, TicketViewSet
+
+router = SimpleRouter()
+
+router.register("parking", ParkingViewSet, basename="parking")
+router.register("parkingspaces", ParkingSpaceViewSet, basename="parking-spaces")
+router.register("ticket", TicketViewSet, basename="tickets")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-]
+]+router.urls
