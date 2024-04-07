@@ -32,14 +32,6 @@ Em seguida instale as dependências:
     pip install -r requirements.txt
 ~~~
 
-### Migração
-
-Realize a migração necessária para construir o banco SQLite:
-
-~~~
-    python manage.py migrate
-~~~
-
 ### Branches
 
 O projeto está organizado em 4 branches diferentes:
