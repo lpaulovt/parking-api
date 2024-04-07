@@ -22,9 +22,9 @@ from management.api.views import ParkingViewSet, ParkingSpaceViewSet, TicketView
 
 router = SimpleRouter()
 
-router.register("parking", ParkingViewSet, basename="parking")
-router.register("parkingspaces", ParkingSpaceViewSet, basename="parking-spaces")
-router.register("ticket", TicketViewSet, basename="tickets")
+router.register("api/parking", ParkingViewSet, basename="parking")
+router.register("api/parkingspaces", ParkingSpaceViewSet, basename="parking-spaces")
+router.register("api/ticket", TicketViewSet, basename="tickets")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
