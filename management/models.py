@@ -8,6 +8,7 @@ class Parking(BaseModel):
     
     parking_name = models.CharField(max_length=100, default="Untitled Parking")
     hour_price = models.FloatField()
+    num_spaces = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "Parking"
