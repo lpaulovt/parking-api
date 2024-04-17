@@ -29,7 +29,8 @@ class ParkingTestCase(APITestCase):
         url = reverse("parking-list")
         data = {
 	        "parking_name": "Another Parking",
-	        "hour_price": 6.0
+	        "hour_price": 6.0,
+            "num_spaces": 20,
         }
         response = self.client.post(url ,data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
