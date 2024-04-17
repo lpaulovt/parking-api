@@ -16,7 +16,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework.routers import SimpleRouter, DefaultRouter
+from rest_framework.authtoken import views
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+from management.api.views import ParkingViewSet, ParkingSpaceViewSet, TicketViewSet
+
+router = SimpleRouter()
+
+router.register("api/parking", ParkingViewSet, basename="parking")
+router.register("api/parkingspaces", ParkingSpaceViewSet, basename="parking-spaces")
+router.register("api/ticket", TicketViewSet, basename="tickets")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-]
+    path("api/token-auth/", views.obtain_auth_token),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+]+router.urls
