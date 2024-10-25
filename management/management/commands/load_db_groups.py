@@ -12,4 +12,7 @@ class Command(BaseCommand):
         employee_group = Group.objects.get_or_create(name="Employee")
         if employee_group:
             self.stdout.write(self.style.SUCCESS("'Employee' group created."))
+        customer_group = Group.objects.get_or_create(name="Customer")
+        if customer_group:
+            self.stdout.write(self.style.SUCCESS("'Customer' group created."))
         
