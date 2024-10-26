@@ -26,20 +26,6 @@ class Parking(BaseModel):
             return f"{self.parking_name} (Filial de {self.headquarters.parking_name})"
         return f"{self.parking_name} (Sede)"
 
-    # def is_filial(self):
-    #     """Retorna True se for uma filial (ou seja, tiver uma sede)."""
-    #     return self.headquarters is not None
-
-    # def clean(self):
-    #     """Validações personalizadas para garantir consistência."""
-    #     if self.headquarters and self.headquarters == self:
-    #         raise ValidationError("Um estacionamento não pode ser sua própria sede.")
-
-    # def save(self, *args, **kwargs):
-    #     """Aplica as validações antes de salvar."""
-    #     self.full_clean()  # Executa as validações personalizadas
-    #     super().save(*args, **kwargs)
-
 class ParkingSpace(BaseModel):
     cod = models.CharField(max_length=10)
     status = models.BooleanField(default=False) 
