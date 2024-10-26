@@ -8,13 +8,13 @@ from rest_framework.exceptions import ParseError, NotAuthenticated, PermissionDe
 
 
 from core.permissions import IsManager, IsEmployee
-from management.models import Parking, ParkingSpace, Ticket
-from management.api.serializers import ParkingSerializer, ParkingSpaceSerializer, TicketSerializer
+from management.models import Parking, ParkingSpace, Ticket, Car
+from management.api.serializers import ParkingSerializer, ParkingSpaceSerializer, TicketSerializer, CarSerializer
 
 class ParkingViewSet(ModelViewSet):
     serializer_class = ParkingSerializer
     queryset = Parking.objects.all()
-    permission_classes = [IsManager]
+    # permission_classes = [IsManager]
 
     def create(self, request, *args, **kwargs):
         serializer = ParkingSerializer(data=request.data)
@@ -23,6 +23,8 @@ class ParkingViewSet(ModelViewSet):
             new_parking = Parking.objects.create(
                 parking_name = serializer.validated_data['parking_name'],
                 hour_price = serializer.validated_data['hour_price'],
+                user = serializer.validated_data['user'],
+                headquarters = serializer.validated_data['headquarters'],
                 created_by = request.user,
             )
             serializer = ParkingSerializer(new_parking)
@@ -47,10 +49,38 @@ class ParkingViewSet(ModelViewSet):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
+    def list(self, request, *args, **kwargs):
+        try:
+            user_id = request.query_params.get('id')
+
+            if user_id:
+                queryset = self.get_queryset().filter(user=user_id)
+                if not queryset.exists():
+                    return Response(
+                        {"Info": "No parking records found for this user.",  "data": []},
+                        status=status.HTTP_200_OK,
+                    )
+            else:
+                queryset = self.get_queryset()
+
+            serializer = ParkingSerializer(queryset, many=True)
+            return Response(
+                {"Info": "Parking records", "data": serializer.data},
+                status=status.HTTP_200_OK,
+            )
+
+        except NotAuthenticated:
+            return Response(
+                {"Info": "Not Authenticated User."}, status=status.HTTP_401_UNAUTHORIZED
+            )
+        except PermissionDenied:
+            return Response(
+                {"Info": "Permission Denied."}, status=status.HTTP_403_FORBIDDEN
+            )
 class ParkingSpaceViewSet(ModelViewSet):
     serializer_class = ParkingSpaceSerializer
     queryset = ParkingSpace.objects.all()
-    permission_classes = [IsEmployee, IsManager]
+    # permission_classes = [IsEmployee, IsManager]
 
     def create(self, request, *args, **kwargs):
         serializer = ParkingSpaceSerializer(data=request.data)
@@ -60,6 +90,7 @@ class ParkingSpaceViewSet(ModelViewSet):
                 cod = serializer.validated_data['cod'],
                 status = serializer.validated_data['status'],
                 parking = serializer.validated_data['parking'],
+                pwd = serializer.validated_data['pwd'],
                 created_by = request.user,
             )
             serializer = ParkingSpaceSerializer(new_parking_space)
@@ -87,17 +118,16 @@ class ParkingSpaceViewSet(ModelViewSet):
 class TicketViewSet(ModelViewSet):
     serializer_class = TicketSerializer
     queryset = Ticket.objects.all()
-    permission_classes = [IsEmployee, IsManager]
+    #permission_classes = [IsEmployee, IsManager]
 
     def create(self, request, *args, **kwargs):
         serializer = TicketSerializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
             new_parking_space = Ticket.objects.create(
-                model = serializer.validated_data['model'],
-                license_plate = serializer.validated_data['license_plate'],
                 checkin = serializer.validated_data['checkin'],
                 checkout = serializer.validated_data['checkout'],
+                car = serializer.validated_data['car'],
                 parking_space = serializer.validated_data['parking_space'],
                 value = serializer.validated_data['value'],
                 created_by = request.user,
@@ -145,6 +175,71 @@ class TicketViewSet(ModelViewSet):
             return Response(
                 {
                     "Info": "Fail to calculate Ticket!"
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except NotAuthenticated:
+            return Response(
+                {"Info": "Not Authenticated User."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        except PermissionDenied:
+            return Response(
+                {"Info": "Permission Denied."}, status=status.HTTP_403_FORBIDDEN
+            )
+        
+class CarViewSet(ModelViewSet):
+    serializer_class = CarSerializer
+    queryset = Car.objects.all()
+    #permission_classes = [IsEmployee, IsManager]
+
+    def create(self, request, *args, **kwargs):
+        serializer = CarSerializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            new_car = Car.objects.create(
+                model = serializer.validated_data['model'],
+                license_plate = serializer.validated_data['license_plate'],
+                user = serializer.validated_data['user'],
+                created_by = request.user,
+            )
+            serializer = CarSerializer(new_car)
+            return Response(
+                {"Info": "Car list", "data": serializer.data},
+                status=status.HTTP_200_OK,
+            )
+        except (ParseError, ValueError):
+            return Response(
+                {
+                    "Info": "Fail to create new ticket!"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except PermissionDenied:
+            return Response(
+                {"Info": "Permission Denied."}, status=status.HTTP_403_FORBIDDEN
+            )
+        except NotAuthenticated:
+            return Response(
+                {"Info": "Not Authenticated User."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        
+    def filterByUser(self, request, id=None, *args, **kwargs):
+        try:
+            queryset = super().get_queryset()
+            if customer_id is not None:
+                queryset = queryset.filter(user=id)
+            return queryset
+            serializer = CarSerializer(ticket)
+            return Response(
+                {"Info": "Car", "data": serializer.data},
+                status=status.HTTP_200_OK,
+            )
+        except Ticket.DoesNotExist:
+            return Response(
+                {
+                    "Info": "Fail find cars"
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )

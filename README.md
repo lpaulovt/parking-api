@@ -52,3 +52,10 @@ Para colocar o projeto em execução use o comando:
 ~~~
     python manage.py runserver
 ~~~
+
+O usuário não vai ter um limite de carros
+O usuário poderá ter carros estacionados simultaneamente em diversas localidades
+A assinatura sera padrão, apenas cadastro do usuário e carro
+O usuário poderá fazer o gerenciamento dos carros, sem limite de cadastro
+A validação sera feita através do veiculos(modelo, placa)
+Cada estacionamento devera ter pelo menos 10% das vagas para pcd.

@@ -19,18 +19,19 @@ from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from management.api.views import ParkingViewSet, ParkingSpaceViewSet, TicketViewSet
+from management.api.views import ParkingViewSet, ParkingSpaceViewSet, TicketViewSet, CarViewSet
 
 router = SimpleRouter()
 
 router.register("api/parking", ParkingViewSet, basename="parking")
 router.register("api/parkingspaces", ParkingSpaceViewSet, basename="parking-spaces")
 router.register("api/ticket", TicketViewSet, basename="tickets")
+router.register("api/car", CarViewSet, basename="cars")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('auth/', include('auth.urls')),
-    path('customer/', include('customer.urls')),
+    path('api/auth/', include('auth.urls')),
+    path('api/customer/', include('customer.urls')),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]+router.urls
