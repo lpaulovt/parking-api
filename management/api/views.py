@@ -5,32 +5,26 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ParseError, NotAuthenticated, PermissionDenied
 
-
-
 from core.permissions import IsManager, IsEmployee
 from management.models import Parking, ParkingSpace, Ticket, Car
 from management.api.serializers import ParkingSerializer, ParkingSpaceSerializer, TicketSerializer, CarSerializer
+from management.services import ParkingService, ParkingSpaceService, TicketService
 
 class ParkingViewSet(ModelViewSet):
     serializer_class = ParkingSerializer
     queryset = Parking.objects.all()
+    service = ParkingService()
     # permission_classes = [IsManager]
 
     def create(self, request, *args, **kwargs):
         serializer = ParkingSerializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
-            new_parking = Parking.objects.create(
-                parking_name = serializer.validated_data['parking_name'],
-                hour_price = serializer.validated_data['hour_price'],
-                user = serializer.validated_data['user'],
-                headquarters = serializer.validated_data['headquarters'],
-                created_by = request.user,
-            )
+            new_parking = self.service.create(serializer, request.user)
             serializer = ParkingSerializer(new_parking)
             return Response(
                 {"Info": "Parking created!", "data": serializer.data},
-                status=status.HTTP_200_OK,
+                status=status.HTTP_201_CREATED,
             )
         except (ParseError, ValueError):
             return Response(
@@ -80,23 +74,18 @@ class ParkingViewSet(ModelViewSet):
 class ParkingSpaceViewSet(ModelViewSet):
     serializer_class = ParkingSpaceSerializer
     queryset = ParkingSpace.objects.all()
+    service = ParkingSpaceService()
     # permission_classes = [IsEmployee, IsManager]
 
     def create(self, request, *args, **kwargs):
         serializer = ParkingSpaceSerializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
-            new_parking_space = ParkingSpace.objects.create(
-                cod = serializer.validated_data['cod'],
-                status = serializer.validated_data['status'],
-                parking = serializer.validated_data['parking'],
-                pwd = serializer.validated_data['pwd'],
-                created_by = request.user,
-            )
+            new_parking_space = self.service.create(serializer, request.user)
             serializer = ParkingSpaceSerializer(new_parking_space)
             return Response(
                 {"Info": "Parking space created!", "data": serializer.data},
-                status=status.HTTP_200_OK,
+                status=status.HTTP_201_CREATED,
             )
         except (ParseError, ValueError):
             return Response(
@@ -118,24 +107,18 @@ class ParkingSpaceViewSet(ModelViewSet):
 class TicketViewSet(ModelViewSet):
     serializer_class = TicketSerializer
     queryset = Ticket.objects.all()
+    service = TicketService()
     #permission_classes = [IsEmployee, IsManager]
 
     def create(self, request, *args, **kwargs):
         serializer = TicketSerializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
-            new_parking_space = Ticket.objects.create(
-                checkin = serializer.validated_data['checkin'],
-                checkout = serializer.validated_data['checkout'],
-                car = serializer.validated_data['car'],
-                parking_space = serializer.validated_data['parking_space'],
-                value = serializer.validated_data['value'],
-                created_by = request.user,
-            )
-            serializer = TicketSerializer(new_parking_space)
+            new_ticket = self.service.create(serializer, request.user)
+            serializer = TicketSerializer(new_ticket)
             return Response(
                 {"Info": "Ticket created!", "data": serializer.data},
-                status=status.HTTP_200_OK,
+                status=status.HTTP_201_CREATED,
             )
         except (ParseError, ValueError):
             return Response(
@@ -154,19 +137,12 @@ class TicketViewSet(ModelViewSet):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-    @action(methods=['get'],detail=True, url_path="payment" )
+    @action(methods=['get'],detail=True, url_path="payment")
     def calculateTicket(self, request, pk):
         try:
             ticket = self.get_object()
-            reference_date = datetime.now().date()
-
-            combined_checkin = datetime.combine(reference_date, ticket.checkin)
-            combined_checkout = datetime.combine(reference_date, ticket.checkout)
-            
-            total_time = combined_checkout - combined_checkin
-            ticket.value = total_time.total_seconds() / 3600 *ticket.parking_space.parking.hour_price
-            ticket.save()
-            serializer = TicketSerializer(ticket)
+            updated_ticket = self.service.calc_ticket(ticket)
+            serializer = TicketSerializer(updated_ticket)
             return Response(
                 {"Info": "Ticket checkout!", "data": serializer.data},
                 status=status.HTTP_200_OK,
