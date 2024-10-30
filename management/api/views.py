@@ -202,6 +202,7 @@ class CarViewSet(ModelViewSet):
                 license_plate = serializer.validated_data['license_plate'],
                 user = serializer.validated_data['user'],
                 created_by = request.user,
+                year = serializer.validated_data['year']
             )
             serializer = CarSerializer(new_car)
             return Response(

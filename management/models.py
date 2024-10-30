@@ -43,6 +43,8 @@ class Car(BaseModel):
     model = models.CharField(max_length=100)
     license_plate = models.CharField(max_length=100, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=None, related_name="cars")
+    color = models.CharField(max_length=100)
+    year = models.CharField(max_length=4, null=False, blank=False)
 
     class Meta:
         verbose_name = "Car"
