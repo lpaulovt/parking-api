@@ -35,7 +35,7 @@ class ParkingTestCase(APITestCase):
             "headquarters": self.parking.id,
         }
         response = self.client.post(url ,data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Parking.objects.filter(parking_name='Another Parking').exists())
     
     def test_parking_reading(self):

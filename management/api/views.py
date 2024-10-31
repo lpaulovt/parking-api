@@ -16,39 +16,6 @@ class ParkingViewSet(ModelViewSet):
     queryset = Parking.objects.all()
     # permission_classes = [IsManager]
 
-    def create(self, request, *args, **kwargs):
-        serializer = ParkingSerializer(data=request.data)
-        try:
-            serializer.is_valid(raise_exception=True)
-            new_parking = Parking.objects.create(
-                parking_name = serializer.validated_data['parking_name'],
-                hour_price = serializer.validated_data['hour_price'],
-                user = serializer.validated_data['user'],
-                headquarters = serializer.validated_data['headquarters'],
-                created_by = request.user,
-            )
-            serializer = ParkingSerializer(new_parking)
-            return Response(
-                {"Info": "Parking created!", "data": serializer.data},
-                status=status.HTTP_200_OK,
-            )
-        except (ParseError, ValueError):
-            return Response(
-                {
-                    "Info": "Fail to create new parking!"
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        except PermissionDenied:
-            return Response(
-                {"Info": "Permission Denied."}, status=status.HTTP_403_FORBIDDEN
-            )
-        except NotAuthenticated:
-            return Response(
-                {"Info": "Not Authenticated User."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
     def list(self, request, *args, **kwargs):
         try:
             user_id = request.query_params.get('id')
