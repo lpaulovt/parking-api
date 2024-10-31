@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='car',
             name='year',
-            field=models.IntegerField(default=2000, help_text='Insira apenas o ano (ex: 2024).', validators=[management.models.validate_year]),
+            field=models.IntegerField(default=2000, help_text='Insira apenas o ano (ex: 2024).'),
             preserve_default=False,
         ),
     ]
