@@ -42,12 +42,12 @@ class ParkingSpace(BaseModel):
 
 
 def validate_year(value):
-    if value < 1980 or value > 2025:
-        raise ValidationError(f'O ano deve estar entre 1980 e 2025, você inseriu {value}.')
+    if value < 1886:  
+        raise ValidationError('O ano deve ser 1886 ou posterior.')
     
 class Car(BaseModel):
     model = models.CharField(max_length=100)
-    year = models.IntegerField(validators=[validate_year], help_text="Insira apenas o ano (ex: 2024).")
+    year = models.IntegerField(validators=[validate_year], help_text="Insira apenas o ano.", null=False)
     license_plate = models.CharField(max_length=100, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=None, related_name="cars")
 

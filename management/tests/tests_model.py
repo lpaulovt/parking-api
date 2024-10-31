@@ -7,8 +7,6 @@ from rest_framework.authtoken.models import Token
 
 from management.models import Parking, ParkingSpace, Ticket, Car
 
-# Create your tests here.
-
 class ParkingTestCase(APITestCase):
 
     def setUp(self):
@@ -130,10 +128,57 @@ class ParkingSpaceTestCase(APITestCase):
 class CarModelTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="user3", password="pass")
+        self.token = Token.objects.create(user=self.user)
         self.car = Car.objects.create(model="Car Model", license_plate="ABC1234", year=2012, user=self.user, created_by=self.user)
 
     def test_car_str(self):
         self.assertEqual(str(self.car), f"{self.car.id} | {self.car.model} | {self.car.license_plate} | {self.car.year}")
+
+    def test_list_cars(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
+        url = reverse('cars-list') 
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_car_creation(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
+        url = reverse("cars-list")
+        data = {
+            "model": "Another Car",
+            "license_plate": "XGZ5678",
+            "year": 2023,
+            "user": self.user.id,
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Car.objects.filter(license_plate='XGZ5678').exists())
+
+    def test_car_reading(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
+        url = reverse("cars-detail", kwargs={'pk': self.car.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(Car.objects.filter(license_plate="ABC1234").exists())
+
+    def test_car_updating(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
+        url = reverse("cars-detail", kwargs={'pk': self.car.pk}) 
+        data = {
+            "model": "Updated Car Model",
+            "license_plate": "ABC1234",
+            "year": 2015,
+        }
+        response = self.client.put(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.car.refresh_from_db()
+        self.assertEqual(self.car.year, 2015)
+
+    def test_car_delete(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
+        url = reverse("cars-detail", kwargs={'pk': self.car.pk})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Car.objects.filter(license_plate='ABC1234').exists())
 
 class TicketTestCase(APITestCase):
 
