@@ -72,14 +72,3 @@ class Ticket(BaseModel):
 
     def __str__(self) -> str:
         return f'{self.id} | {self.model} | {self.license_plate} | {self.value}'
-    
-class Plan(BaseModel):
-    nome = models.CharField(max_length=100)
-    allowed_parkings = models.ManyToManyField(Parking, blank=True)
-
-    class Meta:
-        verbose_name = "Plan"
-        verbose_name_plural = "Plans"
-    
-    def __str__(self) -> str:
-        return f'{self.name} | {self.allowed_parkings}'
