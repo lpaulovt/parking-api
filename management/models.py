@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ValidationError
 
 from core.models import BaseModel
 from django.contrib.auth.models import User
@@ -6,7 +7,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class Parking(BaseModel):
-    
+
     parking_name = models.CharField(max_length=100, default="Untitled Parking")
     hour_price = models.FloatField()
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=None,  related_name="parking_lots")
@@ -39,8 +40,14 @@ class ParkingSpace(BaseModel):
     def __str__(self) -> str:
         return f'{self.cod} | {self.parking} | Status: {self.status}'
 
+
+def validate_year(value):
+    if value < 1980 or value > 2025:
+        raise ValidationError(f'O ano deve estar entre 1980 e 2025, você inseriu {value}.')
+    
 class Car(BaseModel):
     model = models.CharField(max_length=100)
+    year = models.IntegerField(validators=[validate_year], help_text="Insira apenas o ano (ex: 2024).")
     license_plate = models.CharField(max_length=100, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=None, related_name="cars")
 
@@ -49,7 +56,7 @@ class Car(BaseModel):
         verbose_name_plural = "Cars"
 
     def __str__(self) -> str:
-        return f'{self.id} | {self.model} | {self.license_plate}'
+        return f'{self.id} | {self.model} | {self.license_plate} | {self.year}'
 
 
 class Ticket(BaseModel):
