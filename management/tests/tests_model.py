@@ -127,6 +127,14 @@ class ParkingSpaceTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(ParkingSpace.objects.filter(cod='A01').exists())
 
+class CarModelTest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="user3", password="pass")
+        self.car = Car.objects.create(model="Car Model", license_plate="ABC1234", year=2012, user=self.user, created_by=self.user)
+
+    def test_car_str(self):
+        self.assertEqual(str(self.car), f"{self.car.id} | {self.car.model} | {self.car.license_plate} | {self.car.year}")
+
 class TicketTestCase(APITestCase):
 
     def setUp(self):
@@ -134,7 +142,7 @@ class TicketTestCase(APITestCase):
         managers_group, _ = Group.objects.get_or_create(name="Manager")
         self.user.groups.add(managers_group)
         self.token = Token.objects.create(user_id=self.user.id)
-        self.car = Car.objects.create( model = "Jeep Renegade", license_plate= "HJX8321", user=self.user, created_by = self.user)
+        self.car = Car.objects.create( model = "Jeep Renegade", license_plate= "HJX8321", year="2013", user=self.user, created_by = self.user)
         self.parking = Parking.objects.create(parking_name="New Parking", hour_price=4.0, created_by=self.user)
         self.parking_space = ParkingSpace.objects.create(cod="A01", status=False, parking=self.parking, created_by=self.user)
         self.ticket = Ticket.objects.create(
